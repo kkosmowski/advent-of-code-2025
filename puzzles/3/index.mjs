@@ -23,24 +23,72 @@ class Puzzle3 {
   #data;
 
   #read() {
-    this.#data = read(inputSm, options);
+    // this.#data = read(inputSm, options);
     // this.#data = read(inputMd, options);
     // this.#data = read(inputLg, options);
-    // this.#data = read(realInput, options);
+    this.#data = read(realInput, options);
   }
 
   partA() {
     this.#read();
 
-    const something = this.#a.getSomething();
+    const joltages = this.#a.getHighestJoltages(this.#data);
+    const result = this.#a.sumJoltages(joltages);
 
-    // return result;
+    return result;
   }
 
   #a = {
-    getSomething: (data) => {
+    /**
+     * Finds the highest "joltage" for each battery
+     * @param {string[]} batteries
+     * @returns {number[]}
+     */
+    getHighestJoltages: (batteries) => {
+      const joltages = [];
 
+      for (const battery of batteries) {
+        joltages.push(this.#a.findHighestJoltage(battery));
+      }
+
+      return joltages;
     },
+    /**
+     * Finds the highest "joltage" for single battery
+     * @param {string} battery
+     * @returns {number}
+     */
+    findHighestJoltage: (battery) => {
+      const [firstValue, index] = this.#a.findHighestDigitWithIndex(battery.slice(0, battery.length - 1));
+      const [lastValue] = this.#a.findHighestDigitWithIndex(battery.slice(index + 1));
+
+      return Number(firstValue.concat(lastValue));
+    },
+    /**
+     * Iterates through a string of digits to find the highest one. Returns max value and its index.
+     * @param {string} string
+     * @returns {[string, number]}
+     */
+    findHighestDigitWithIndex: (string) => {
+      let max = 0;
+      let index = 0;
+
+      for (let i = 0; i < string.length; i++) {
+        if (Number(string[i]) > max) {
+          max = Number(string[i]);
+          index = i;
+        }
+      }
+
+      return [String(max), index];
+    },
+    /**
+     * @param {number[]} joltages
+     * @returns {number}
+     */
+    sumJoltages: (joltages) => {
+      return joltages.reduce((total, value) => total + value, 0);
+    }
   }
 
   // ----------
