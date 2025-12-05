@@ -13,8 +13,8 @@ const realInput = 'input.txt';
 function result() {
   const puzzle = new Puzzle3();
 
-  console.log(puzzle.partA());
-  // console.log(puzzle.partB());
+  // console.log(puzzle.partA());
+  console.log(puzzle.partB());
 }
 
 // ----------------------------------------
@@ -24,7 +24,7 @@ class Puzzle3 {
 
   #read() {
     // this.#data = read(inputSm, options);
-    // this.#data = read(inputMd, options);
+    // this.#data = read(inputMd, options); // custom input
     // this.#data = read(inputLg, options);
     this.#data = read(realInput, options);
   }
@@ -96,15 +96,78 @@ class Puzzle3 {
   partB() {
     this.#read();
 
-    const something = this.#b.getSomething();
+    const joltages = this.#b.getHighestJoltages(this.#data);
+    const result = this.#b.sumJoltages(joltages);
 
-    // return result;
+    return result;
   }
 
   #b = {
-    getSomething: (data) => {
+    desiredLength: 12,
+    /**
+     * Finds the highest "joltage" for each battery
+     * @param {string[]} batteries
+     * @returns {number[]}
+     */
+    getHighestJoltages: (batteries) => {
+      const joltages = [];
 
+      for (const battery of batteries) {
+        joltages.push(this.#b.findHighestJoltage(battery));
+      }
+
+      return joltages;
     },
+    /**
+     * Finds the highest "joltage" for single battery.
+     * This time, however, it needs 12 digits instead of 2.
+     * @param {string} battery
+     * @returns {number}
+     */
+    findHighestJoltage: (battery) => {
+      let joltage = '';
+      let minIndexToLookFor = 0;
+
+      while (joltage.length < this.#b.desiredLength) {
+        const maxIndexToLookFor = battery.length - this.#b.desiredLength + 1 + joltage.length;
+        // console.log('  minI', minIndexToLookFor, ', maxI', maxIndexToLookFor, ', range', battery.slice(minIndexToLookFor, maxIndexToLookFor));
+        const [digit, index] = this.#b.findHighestDigitWithIndex(battery.slice(minIndexToLookFor, maxIndexToLookFor));
+        // console.log('    digit', digit, ', i', index);
+        joltage += digit;
+        minIndexToLookFor += index + 1;
+
+        if (index === maxIndexToLookFor) {
+          joltage += battery.slice(maxIndexToLookFor + 1);
+        }
+      }
+
+      return Number(joltage);
+    },
+    /**
+     * Iterates through a string of digits to find the highest one. Returns max value and its index.
+     * @param {string} string
+     * @returns {[string, number]}
+     */
+    findHighestDigitWithIndex: (string) => {
+      let max = 0;
+      let index = 0;
+
+      for (let i = 0; i <= string.length; i++) {
+        if (Number(string[i]) > max) {
+          max = Number(string[i]);
+          index = i;
+        }
+      }
+
+      return [String(max), index];
+    },
+    /**
+     * @param {number[]} joltages
+     * @returns {number}
+     */
+    sumJoltages: (joltages) => {
+      return joltages.reduce((total, value) => total + value, 0);
+    }
   }
 }
 
